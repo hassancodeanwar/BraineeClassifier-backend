@@ -1,12 +1,13 @@
-
 import os
 import numpy as np
+import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import tensorflow as tf
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -14,7 +15,7 @@ CORS(app)  # Enable CORS for all routes
 # Configuration
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MODEL_PATH = 'Brain_Tumor_Classifier_Enhanced.h5'
+MODEL_URL = 'https://raw.githubusercontent.com/hassancodeanwar/BraineeClassifier/main/Backend/Brain_Tumor_Classifier_Enhanced.h5'  # Raw URL of the model file
 
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -22,9 +23,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Configure app
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
-
-# Load pre-trained model
-model = load_model(MODEL_PATH)
 
 # Helper functions
 def allowed_file(filename):
@@ -46,6 +44,22 @@ def get_class_labels():
         0: 'No Tumor',
         1: 'Tumor', 
     }
+
+def load_model_from_github():
+    """Load model from GitHub URL"""
+    try:
+        # Request model file from GitHub
+        response = requests.get(MODEL_URL)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        model_file = BytesIO(response.content)  # Create a BytesIO stream from the model content
+        model = load_model(model_file)  # Load the model from the BytesIO stream
+        return model
+    except Exception as e:
+        print(f"Error loading model from GitHub: {str(e)}")
+        return None
+
+# Load model once at the start of the application
+model = load_model_from_github()
 
 @app.route('/predict', methods=['POST'])
 def predict():
