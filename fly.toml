@@ -1,0 +1,17 @@
+app = "index.py"
+primary_region = "dfw"
+
+[build]
+dockerfile = "Dockerfile"
+
+[env]
+FLASK_ENV = "production"
+
+[http_service]
+internal_port = 5000
+force_https = true
+
+[[vm]]
+cpu_kind = "shared"
+cpus = 1
+memory_mb = 256
