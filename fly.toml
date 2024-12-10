@@ -1,17 +1,14 @@
-app = "index.py"
-primary_region = "dfw"
+app = "my-flask-backend"
 
 [build]
-dockerfile = "Dockerfile"
+  dockerfile = "Dockerfile"
 
-[env]
-FLASK_ENV = "production"
+[[services]]
+  http_checks = []
+  internal_port = 5000
 
-[http_service]
-internal_port = 5000
-force_https = true
-
-[[vm]]
-cpu_kind = "shared"
-cpus = 1
-memory_mb = 256
+  [[services.http]]
+    services = ["http"]
+    [[services.http.ports]]
+      port = "80"
+      handlers = ["http"]
