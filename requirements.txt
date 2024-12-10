@@ -1,5 +1,5 @@
-Flask==2.0.3
-Flask-Cors==3.0.10
-tensorflow==2.6.0  # or the version you are using
-numpy==1.21.2
-werkzeug==2.0.3
+Flask
+Flask-Cors
+tensorflow
+numpy
+werkzeug
