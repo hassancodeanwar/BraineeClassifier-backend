@@ -1,25 +1,32 @@
-# Use an official Python runtime as the base image
-FROM python:3.10-slim
+# Use Python 3.10.12 as the base image
+FROM python:3.10.12-slim
 
-# Set environment variables to avoid Python buffering and ensure consistent behavior
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
-# Create and set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy requirements first to leverage Docker's caching mechanism
-COPY requirements.txt .
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies with pip
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Copy the rest of the application code
-COPY . .
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the application port
+# Create uploads directory
+RUN mkdir -p uploads
+
+# Download the model file (you'll need to provide the model file or download link)
+# Uncomment and modify the following line if you need to download the model
+# RUN wget -O model/Brain_Tumor_Classifier_Enhanced.h5 [MODEL_DOWNLOAD_URL]
+
+# Make port 5000 available to the world outside this container
 EXPOSE 5000
 
-# Define the default command to run the app
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "main:app"]
+# Define environment variable to run Flask in production
+ENV FLASK_ENV=production
+
+# Run the application
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
